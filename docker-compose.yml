@@ -40,11 +40,49 @@ services:
        links:
          - db:db
 
+   pma2:
+       image: phpmyadmin/phpmyadmin
+       depends_on:
+       - db_mail
+       environment:
+         PMA_HOST: db_mail
+         PMA_PORT: 3306
+         MYSQL_ROOT_PASSWORD: root
+       ports:
+         - "8082:80"
+       links:
+         - db_mail:db
+
    roundcube:
        image: roundcube/roundcubemail
+       depends_on:
+       - db_mail
        ports:
          - "8143:143"
          - "8587:587"
          - "8081:80"
        volumes:
          - ./data/roundcube/config:/config/
+       restart: always
+       environment:
+#         ROUNDCUBEMAIL_DB_TYPE: mysql
+         ROUNDCUBEMAIL_DB_HOST: db_mail
+         ROUNDCUBEMAIL_DB_USER: root
+         ROUNDCUBEMAIL_DB_PASSWORD: somewordpress
+       links:
+         - db_mail:db
+
+
+   db_mail:
+       image: mysql:5.7
+       volumes:
+         - ./data/db_mail/db_data:/var/lib/mysql
+       restart: always
+       ports:
+         - "8336:3306"
+         - "8360:33060"
+       environment:
+         MYSQL_ROOT_PASSWORD: somewordpress
+         MYSQL_DATABASE: roundcubemail
+         MYSQL_USER: roundcubemail
+         MYSQL_PASSWORD: wordpress
