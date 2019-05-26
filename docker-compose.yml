@@ -38,7 +38,7 @@ services:
        links:
          - db:db
 
-   zimbra:
+   roundcube:
        image: roundcube/roundcubemail
        ports:
          - "8143:143"
